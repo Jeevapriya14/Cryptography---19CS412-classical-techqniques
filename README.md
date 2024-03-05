@@ -65,6 +65,8 @@ if __name__ == "__main__":
     main()
 ```
 ## OUTPUT:
+<img width="344" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/eec32762-3017-4859-82ae-47a90d4de62d">
+<img width="367" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/6d686e73-78ef-4b4a-a6ac-d17648cd509d">
 
 ## RESULT:
 The program is executed successfully
