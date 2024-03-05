@@ -217,71 +217,213 @@ Implementation using C or pyhton code
 Testing algorithm with different key values. 
 
 ## PROGRAM:
-```def matrix_mod_inverse(matrix, modulus):
-    det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
-    det %= modulus
-    det_inv = pow(det, -1, modulus) if gcd(det, modulus) == 1 else None
-    if det_inv is None:
-        return None
-    inverse_matrix = [[matrix[1][1], -matrix[0][1]], [-matrix[1][0], matrix[0][0]]]
+```# *********
+# -*- Made by VoxelPixel
+# -*- For YouTube Tutorial
+# -*- https://github.com/VoxelPixel
+# -*- Support me on Patreon: https://www.patreon.com/voxelpixel
+# *********
+
+import sys
+import numpy as np
+
+
+def cipher_encryption():
+    msg = input("Enter message: ").upper()
+    msg = msg.replace(" ", "")
+
+    # if message length is odd number, append 0 at the end
+    len_chk = 0
+    if len(msg) % 2 != 0:
+        msg += "0"
+        len_chk = 1
+
+    # msg to matrices
+    row = 2
+    col = int(len(msg)/2)
+    msg2d = np.zeros((row, col), dtype=int)
+
+    itr1 = 0
+    itr2 = 0
+    for i in range(len(msg)):
+        if i % 2 == 0:
+            msg2d[0][itr1] = int(ord(msg[i])-65)
+            itr1 += 1
+        else:
+            msg2d[1][itr2] = int(ord(msg[i])-65)
+            itr2 += 1
+    # for
+
+    key = input("Enter 4 letter Key String: ").upper()
+    key = key.replace(" ", "")
+
+    # key to 2x2
+    key2d = np.zeros((2, 2), dtype=int)
+    itr3 = 0
     for i in range(2):
         for j in range(2):
-            inverse_matrix[i][j] *= det_inv
-            inverse_matrix[i][j] %= modulus
-    return inverse_matrix
+            key2d[i][j] = ord(key[itr3])-65
+            itr3 += 1
 
-def gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return a
+    # checking validity of the key
+    # finding determinant
+    deter = key2d[0][0] * key2d[1][1] - key2d[0][1] * key2d[1][0]
+    deter = deter % 26
 
-def hill_encrypt(plaintext, key):
-    n = int(len(key) ** 0.5)
-    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
-    plaintext = plaintext.upper().replace(" ", "").replace("\n", "")
-    if len(plaintext) % n != 0:
-        plaintext += 'X' * (n - len(plaintext) % n)
-    ciphertext = ""
-    for i in range(0, len(plaintext), n):
-        block = [ord(char) - ord('A') for char in plaintext[i:i+n]]
-        encrypted_block = [(matrix[0][0] * block[0] + matrix[0][1] * block[1]) % 26,
-                           (matrix[1][0] * block[0] + matrix[1][1] * block[1]) % 26]
-        ciphertext += ''.join([chr(char + ord('A')) for char in encrypted_block])
-    return ciphertext
+    # finding multiplicative inverse
+    mul_inv = -1
+    for i in range(26):
+        temp_inv = deter * i
+        if temp_inv % 26 == 1:
+            mul_inv = i
+            break
+        else:
+            continue
+    # for
 
-def hill_decrypt(ciphertext, key):
-    n = int(len(key) ** 0.5)
-    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
-    inverse_matrix = matrix_mod_inverse(matrix, 26)
-    if inverse_matrix is None:
-        return "Inverse does not exist, unable to decrypt"
-    plaintext = ""
-    for i in range(0, len(ciphertext), n):
-        block = [ord(char) - ord('A') for char in ciphertext[i:i+n]]
-        decrypted_block = [(inverse_matrix[0][0] * block[0] + inverse_matrix[0][1] * block[1]) % 26,
-                           (inverse_matrix[1][0] * block[0] + inverse_matrix[1][1] * block[1]) % 26]
-        plaintext += ''.join([chr(char + ord('A')) for char in decrypted_block])
-    return plaintext
+    if mul_inv == -1:
+        print("Invalid key")
+        sys.exit()
+    # if
+
+    encryp_text = ""
+    itr_count = int(len(msg)/2)
+    if len_chk == 0:
+        for i in range(itr_count):
+            temp1 = msg2d[0][i] * key2d[0][0] + msg2d[1][i] * key2d[0][1]
+            encryp_text += chr((temp1 % 26) + 65)
+            temp2 = msg2d[0][i] * key2d[1][0] + msg2d[1][i] * key2d[1][1]
+            encryp_text += chr((temp2 % 26) + 65)
+        # for
+    else:
+        for i in range(itr_count-1):
+            temp1 = msg2d[0][i] * key2d[0][0] + msg2d[1][i] * key2d[0][1]
+            encryp_text += chr((temp1 % 26) + 65)
+            temp2 = msg2d[0][i] * key2d[1][0] + msg2d[1][i] * key2d[1][1]
+            encryp_text += chr((temp2 % 26) + 65)
+        # for
+    # if else
+
+    print("Encrypted Text: {}".format(encryp_text))
+
+
+def cipher_decryption():
+    msg = input("Enter message: ").upper()
+    msg = msg.replace(" ", "")
+
+    # if message length is odd number, append 0 at the end
+    len_chk = 0
+    if len(msg) % 2 != 0:
+        msg += "0"
+        len_chk = 1
+
+    # msg to matrices
+    row = 2
+    col = int(len(msg) / 2)
+    msg2d = np.zeros((row, col), dtype=int)
+
+    itr1 = 0
+    itr2 = 0
+    for i in range(len(msg)):
+        if i % 2 == 0:
+            msg2d[0][itr1] = int(ord(msg[i]) - 65)
+            itr1 += 1
+        else:
+            msg2d[1][itr2] = int(ord(msg[i]) - 65)
+            itr2 += 1
+    # for
+
+    key = input("Enter 4 letter Key String: ").upper()
+    key = key.replace(" ", "")
+
+    # key to 2x2
+    key2d = np.zeros((2, 2), dtype=int)
+    itr3 = 0
+    for i in range(2):
+        for j in range(2):
+            key2d[i][j] = ord(key[itr3]) - 65
+            itr3 += 1
+    # for
+
+    # finding determinant
+    deter = key2d[0][0] * key2d[1][1] - key2d[0][1] * key2d[1][0]
+    deter = deter % 26
+
+    # finding multiplicative inverse
+    mul_inv = -1
+    for i in range(26):
+        temp_inv = deter * i
+        if temp_inv % 26 == 1:
+            mul_inv = i
+            break
+        else:
+            continue
+    # for
+
+    # adjugate matrix
+    # swapping
+    key2d[0][0], key2d[1][1] = key2d[1][1], key2d[0][0]
+
+    # changing signs
+    key2d[0][1] *= -1
+    key2d[1][0] *= -1
+
+    key2d[0][1] = key2d[0][1] % 26
+    key2d[1][0] = key2d[1][0] % 26
+
+    # multiplying multiplicative inverse with adjugate matrix
+    for i in range(2):
+        for j in range(2):
+            key2d[i][j] *= mul_inv
+
+    # modulo
+    for i in range(2):
+        for j in range(2):
+            key2d[i][j] = key2d[i][j] % 26
+
+    # cipher to plain
+    decryp_text = ""
+    itr_count = int(len(msg) / 2)
+    if len_chk == 0:
+        for i in range(itr_count):
+            temp1 = msg2d[0][i] * key2d[0][0] + msg2d[1][i] * key2d[0][1]
+            decryp_text += chr((temp1 % 26) + 65)
+            temp2 = msg2d[0][i] * key2d[1][0] + msg2d[1][i] * key2d[1][1]
+            decryp_text += chr((temp2 % 26) + 65)
+            # for
+    else:
+        for i in range(itr_count - 1):
+            temp1 = msg2d[0][i] * key2d[0][0] + msg2d[1][i] * key2d[0][1]
+            decryp_text += chr((temp1 % 26) + 65)
+            temp2 = msg2d[0][i] * key2d[1][0] + msg2d[1][i] * key2d[1][1]
+            decryp_text += chr((temp2 % 26) + 65)
+            # for
+    # if else
+
+    print("Decrypted Text: {}".format(decryp_text))
+
 
 def main():
-    key = input("Enter the key matrix (in uppercase, without spaces):\n")
-    plaintext = input("Enter the plaintext:\n")
-    mode = input("Enter 'E' for encryption or 'D' for decryption:\n").upper()
-
-    if mode == 'E':
-        encrypted_text = hill_encrypt(plaintext, key)
-        print("Encrypted Text:", encrypted_text)
-    elif mode == 'D':
-        decrypted_text = hill_decrypt(plaintext, key)
-        print("Decrypted Text:", decrypted_text)
+    choice = int(input("1. Encryption\n2. Decryption\nChoose(1,2): "))
+    if choice == 1:
+        print("---Encryption---")
+        cipher_encryption()
+    elif choice == 2:
+        print("---Decryption---")
+        cipher_decryption()
     else:
-        print("Invalid mode. Please enter 'E' or 'D'.")
+        print("Invalid Choice")
 
 if __name__ == "__main__":
     main()
 ```
+          
+ 
+  
 ## OUTPUT:
-<img width="433" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/96175539-6d30-43fa-b984-0a71b99c803c">
+<img width="452" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/647caf44-5046-4f5d-96be-c6f2182894ec">
+
+<img width="399" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/aa02dce8-fb95-41f3-b106-d4cbafca220b">
 
 ## RESULT:
 The program is executed successfully
