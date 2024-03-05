@@ -310,90 +310,54 @@ Implementation using C or pyhton code
 Testing algorithm with different key values. 
 
 ## PROGRAM:
-```def gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return a
-
-def matrix_mod_inverse(matrix, modulus):
-    det = (
-        matrix[0][0] * matrix[1][1] * matrix[2][2] +
-        matrix[0][1] * matrix[1][2] * matrix[2][0] +
-        matrix[0][2] * matrix[1][0] * matrix[2][1] -
-        matrix[0][2] * matrix[1][1] * matrix[2][0] -
-        matrix[0][0] * matrix[1][2] * matrix[2][1] -
-        matrix[0][1] * matrix[1][0] * matrix[2][2]
-    ) % modulus
-    det_inv = pow(det, -1, modulus) if gcd(det, modulus) == 1 else None
-    if det_inv is None:
-        return None
-    inverse_matrix = [
-        [(matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]),
-         (matrix[0][2] * matrix[2][1] - matrix[0][1] * matrix[2][2]),
-         (matrix[0][1] * matrix[1][2] - matrix[0][2] * matrix[1][1])],
-
-        [(matrix[1][2] * matrix[2][0] - matrix[1][0] * matrix[2][2]),
-         (matrix[0][0] * matrix[2][2] - matrix[0][2] * matrix[2][0]),
-         (matrix[0][2] * matrix[1][0] - matrix[0][0] * matrix[1][2])],
-
-        [(matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]),
-         (matrix[0][1] * matrix[2][0] - matrix[0][0] * matrix[2][1]),
-         (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0])]
-    ]
-    for i in range(3):
-        for j in range(3):
-            inverse_matrix[i][j] *= det_inv
-            inverse_matrix[i][j] %= modulus
-    return inverse_matrix
-
-def hill_encrypt(plaintext, key):
-    n = int(len(key) ** 0.5)
-    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
-    plaintext = plaintext.upper().replace(" ", "").replace("\n", "")
-    while len(plaintext) % n != 0:
-        plaintext += 'X'
+```def vigenere_encrypt(plaintext, key):
+    """
+    Encrypts plaintext using the Vigenère cipher with the given key.
+    """
     ciphertext = ""
-    for i in range(0, len(plaintext), n):
-        block = [ord(char) - ord('A') for char in plaintext[i:i+n]]
-        encrypted_block = [(matrix[0][0] * block[0] + matrix[0][1] * block[1] + matrix[0][2] * block[2]) % 26,
-                           (matrix[1][0] * block[0] + matrix[1][1] * block[1] + matrix[1][2] * block[2]) % 26,
-                           (matrix[2][0] * block[0] + matrix[2][1] * block[1] + matrix[2][2] * block[2]) % 26]
-        ciphertext += ''.join([chr(char + ord('A')) for char in encrypted_block])
+    key_length = len(key)
+    for i in range(len(plaintext)):
+        shift = ord(key[i % key_length].upper()) - ord('A')
+        if plaintext[i].isalpha():
+            if plaintext[i].isupper():
+                ciphertext += chr((ord(plaintext[i]) + shift - ord('A')) % 26 + ord('A'))
+            else:
+                ciphertext += chr((ord(plaintext[i]) + shift - ord('a')) % 26 + ord('a'))
+        else:
+            ciphertext += plaintext[i]
     return ciphertext
 
-def hill_decrypt(ciphertext, key):
-    n = int(len(key) ** 0.5)
-    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
-    inverse_matrix = matrix_mod_inverse(matrix, 26)
-    if inverse_matrix is None:
-        return "Inverse does not exist, unable to decrypt"
+
+def vigenere_decrypt(ciphertext, key):
+    """
+    Decrypts ciphertext using the Vigenère cipher with the given key.
+    """
     plaintext = ""
-    for i in range(0, len(ciphertext), n):
-        block = [ord(char) - ord('A') for char in ciphertext[i:i+n]]
-        decrypted_block = [(inverse_matrix[0][0] * block[0] + inverse_matrix[0][1] * block[1] + inverse_matrix[0][2] * block[2]) % 26,
-                           (inverse_matrix[1][0] * block[0] + inverse_matrix[1][1] * block[1] + inverse_matrix[1][2] * block[2]) % 26,
-                           (inverse_matrix[2][0] * block[0] + inverse_matrix[2][1] * block[1] + inverse_matrix[2][2] * block[2]) % 26]
-        plaintext += ''.join([chr(char + ord('A')) for char in decrypted_block])
+    key_length = len(key)
+    for i in range(len(ciphertext)):
+        shift = ord(key[i % key_length].upper()) - ord('A')
+        if ciphertext[i].isalpha():
+            if ciphertext[i].isupper():
+                plaintext += chr((ord(ciphertext[i]) - shift - ord('A')) % 26 + ord('A'))
+            else:
+                plaintext += chr((ord(ciphertext[i]) - shift - ord('a')) % 26 + ord('a'))
+        else:
+            plaintext += ciphertext[i]
     return plaintext
 
-def main():
-    key = input("Enter the key matrix (10 characters in uppercase without spaces):\n")
-    plaintext = input("Enter the plaintext:\n")
 
-    if len(key) != 10 or not key.isalpha():
-        print("Invalid key format. Please enter 10 characters in uppercase without spaces.")
-        return
-
-    encrypted_text = hill_encrypt(plaintext, key)
-    decrypted_text = hill_decrypt(encrypted_text, key)
-
-    print("Plaintext:", plaintext)
-    print("Key:", key)
-    print("Encrypted Text:", encrypted_text)
-    print("Decrypted Text:", decrypted_text)
-
+# Example usage:
 if __name__ == "__main__":
-    main()
+    plaintext = input("Enter plaintext")
+    key = input("Enter key")
+
+    # Encrypt
+    encrypted_text = vigenere_encrypt(plaintext, key)
+    print("Encrypted text:", encrypted_text)
+
+    # Decrypt
+    decrypted_text = vigenere_decrypt(encrypted_text, key)
+    print("Decrypted text:", decrypted_text)
 ```
 ## OUTPUT:
 <img width="449" alt="image" src="https://github.com/Jeevapriya14/Cryptography---19CS412-classical-techqniques/assets/121003043/c4e12756-f694-43ca-9bde-ceee2af95c53">
