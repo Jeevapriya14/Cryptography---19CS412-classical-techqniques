@@ -23,7 +23,47 @@ Implementation using C or pyhton code
 Testing algorithm with different key values. 
 
 ## PROGRAM:
+``` def caesar_cipher_encrypt(text, shift):
+    encrypted_text = ""
+    for char in text:
+        if char.isalpha():
+            shifted = ord(char) + shift
+            if char.islower():
+                if shifted > ord('z'):
+                    shifted -= 26
+                elif shifted < ord('a'):
+                    shifted += 26
+            elif char.isupper():
+                if shifted > ord('Z'):
+                    shifted -= 26
+                elif shifted < ord('A'):
+                    shifted += 26
+            encrypted_text += chr(shifted)
+        else:
+            encrypted_text += char
+    return encrypted_text
 
+def caesar_cipher_decrypt(text, shift):
+    return caesar_cipher_encrypt(text, -shift)
+
+def main():
+    text = input("Enter the text to encrypt/decrypt: ")
+    shift = int(input("Enter the shift value: "))
+
+    choice = input("Enter 'E' for encryption or 'D' for decryption: ").upper()
+
+    if choice == 'E':
+        encrypted_text = caesar_cipher_encrypt(text, shift)
+        print("Encrypted text:", encrypted_text)
+    elif choice == 'D':
+        decrypted_text = caesar_cipher_decrypt(text, shift)
+        print("Decrypted text:", decrypted_text)
+    else:
+        print("Invalid choice. Please enter 'E' for encryption or 'D' for decryption.")
+
+if __name__ == "__main__":
+    main()
+```
 ## OUTPUT:
 
 ## RESULT:
