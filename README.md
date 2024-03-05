@@ -217,15 +217,18 @@ Implementation using C or pyhton code
 Testing algorithm with different key values. 
 
 ## PROGRAM:
-```import numpy as np
-
-def matrix_mod_inverse(matrix, modulus):
-    det = int(np.round(np.linalg.det(matrix)))
+```def matrix_mod_inverse(matrix, modulus):
+    det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+    det %= modulus
     det_inv = pow(det, -1, modulus) if gcd(det, modulus) == 1 else None
     if det_inv is None:
         return None
-    adjugate = det * np.linalg.inv(matrix).T
-    return (det_inv * adjugate) % modulus
+    inverse_matrix = [[matrix[1][1], -matrix[0][1]], [-matrix[1][0], matrix[0][0]]]
+    for i in range(2):
+        for j in range(2):
+            inverse_matrix[i][j] *= det_inv
+            inverse_matrix[i][j] %= modulus
+    return inverse_matrix
 
 def gcd(a, b):
     while b:
@@ -233,28 +236,30 @@ def gcd(a, b):
     return a
 
 def hill_encrypt(plaintext, key):
-    n = int(np.sqrt(len(key)))
-    matrix = np.array([ord(char) - ord('A') for char in key]).reshape((n, n))
+    n = int(len(key) ** 0.5)
+    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
     plaintext = plaintext.upper().replace(" ", "").replace("\n", "")
     if len(plaintext) % n != 0:
         plaintext += 'X' * (n - len(plaintext) % n)
     ciphertext = ""
     for i in range(0, len(plaintext), n):
-        block = np.array([ord(char) - ord('A') for char in plaintext[i:i+n]])
-        encrypted_block = np.dot(matrix, block) % 26
+        block = [ord(char) - ord('A') for char in plaintext[i:i+n]]
+        encrypted_block = [(matrix[0][0] * block[0] + matrix[0][1] * block[1]) % 26,
+                           (matrix[1][0] * block[0] + matrix[1][1] * block[1]) % 26]
         ciphertext += ''.join([chr(char + ord('A')) for char in encrypted_block])
     return ciphertext
 
 def hill_decrypt(ciphertext, key):
-    n = int(np.sqrt(len(key)))
-    matrix = np.array([ord(char) - ord('A') for char in key]).reshape((n, n))
+    n = int(len(key) ** 0.5)
+    matrix = [list(map(ord, key[i:i+n])) for i in range(0, len(key), n)]
     inverse_matrix = matrix_mod_inverse(matrix, 26)
     if inverse_matrix is None:
         return "Inverse does not exist, unable to decrypt"
     plaintext = ""
     for i in range(0, len(ciphertext), n):
-        block = np.array([ord(char) - ord('A') for char in ciphertext[i:i+n]])
-        decrypted_block = np.dot(inverse_matrix, block) % 26
+        block = [ord(char) - ord('A') for char in ciphertext[i:i+n]]
+        decrypted_block = [(inverse_matrix[0][0] * block[0] + inverse_matrix[0][1] * block[1]) % 26,
+                           (inverse_matrix[1][0] * block[0] + inverse_matrix[1][1] * block[1]) % 26]
         plaintext += ''.join([chr(char + ord('A')) for char in decrypted_block])
     return plaintext
 
